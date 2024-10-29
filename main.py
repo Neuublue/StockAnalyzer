@@ -13,14 +13,14 @@ class DataLoader:
     def load_data(self):
         # Verify files and load the data
         if not all(os.path.exists(file) for file in self.file_paths):
-            raise FileNotFoundError("One or more files not found.")
+            raise FileNotFoundError('One or more files not found.')
         
         data_frames = [self._read_and_format(file) for file in self.file_paths]
         if len(data_frames) > 1:
             self.data = self._merge_data(data_frames)
         else:
             self.data = data_frames[0]
-        print("Data loaded successfully.")
+        print('Data loaded successfully.')
         return self.data
 
     def _read_and_format(self, file_path):
@@ -210,19 +210,67 @@ class StockAnalyzer:
         plt.legend()
         plt.show()
 
+def main():
+    # Get the current script's directory
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Construct the path to the data directory
+    directory = os.path.join(script_dir, 'data')
 
-# Main execution
-analyzer = StockAnalyzer([r"C:\Storage\vscode\StockAnalyzer\data\A.csv"])
-analyzer.load_data()
+    # Print the current working directory for debugging
+    print('Current Working Directory:', os.getcwd())
+    print('Data Directory:', directory)
 
-sorted_data = analyzer.sort_data("Date")
-print(sorted_data.head(), '\n')
+    # Check if the directory exists
+    if not os.path.exists(directory):
+        print(f'The specified directory does not exist: {directory}')
+        return
 
-max_gain = analyzer.find_max_gain_loss_period()
-print("Max gain/loss period:", max_gain, '\n')
+    # List CSV files and prompt user to select one
+    csv_files = [file for file in os.listdir(directory) if file.endswith('.csv')]
+    if not csv_files:
+        print('No CSV files found in the specified directory.')
+        return
 
-anomalies = analyzer.detect_anomalies(threshold=10)
-print("Anomalies detected:")
+    print('Available CSV files:')
+    for i, file in enumerate(csv_files, start=1):
+        print(f'{i}: {file}')
 
-for anomaly in anomalies:
-    print(anomaly)
+    file_choice = int(input('Select a file number: ')) - 1
+    if file_choice < 0 or file_choice >= len(csv_files):
+        print('Invalid choice.')
+        return
+
+    selected_file = os.path.join(directory, csv_files[file_choice])
+
+    # Create StockAnalyzer instance
+    analyzer = StockAnalyzer([selected_file])
+    analyzer.load_data()
+
+    # Prompt user for operation
+    print('\nChoose an operation to perform:')
+    print('1: Sort data')
+    print('2: Find maximum gain/loss period')
+    print('3: Detect anomalies')
+    operation_choice = int(input('Select an operation number: '))
+
+    if operation_choice == 1:
+        key_column = input('Enter the column to sort by (e.g., Date): ')
+        sorted_data = analyzer.sort_data(key_column)
+        print(sorted_data.head())
+
+    elif operation_choice == 2:
+        max_gain = analyzer.find_max_gain_loss_period()
+        print('Max gain/loss period:', max_gain)
+
+    elif operation_choice == 3:
+        threshold = float(input('Enter the threshold for anomaly detection: '))
+        anomalies = analyzer.detect_anomalies(threshold)
+        print('Anomalies detected:')
+        for anomaly in anomalies:
+            print(anomaly)
+
+    else:
+        print('Invalid operation choice.')
+
+if __name__ == '__main__':
+    main()
