@@ -30,7 +30,7 @@ StockAnalyzer/
 
 Below is a flowchart illustrating the overall structure of the implementation:
 
-![Structure and Flow](./images/1.png)
+![Structure and Flow](./images/1.svg)
 
 #### Class Summaries
 
